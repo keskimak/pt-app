@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Dialog from '@mui/material/Dialog';
@@ -7,8 +7,20 @@ import DialogContent from '@mui/material/DialogContent';
 import dayjs from "dayjs";
 
 import DialogTitle from '@mui/material/DialogTitle';
+import { ListItem, MenuItem, Select } from "@mui/material";
 
-export default function EditTraining(props) {
+export default function AddTraining(props) {
+
+    const [customers, setCustomers] = useState([]);
+
+    useEffect(() => fetchData(), [])
+    const fetchData = () => {
+        fetch('http://traineeapp.azurewebsites.net/api/customers')
+            .then(response => response.json())
+            .then(data => setCustomers(data.content))
+            .catch(err => Error(err))
+
+    }
 
     const [open, setOpen] = React.useState(false);
     const [training, setTtraining] = useState({
@@ -17,39 +29,26 @@ export default function EditTraining(props) {
         duration: '',
         activity: '',
         customer: {
-            firstname:'',
-            lastname:''
+            firstname: '',
+            lastname: ''
         }
-     
+
     })
 
-    //dayjs(row.accessorKey).format('DD.MM.YYYY')
-
+    //Open modal
     const handleClickOpen = () => {
-     
-        setTtraining({
-            id: props.training.id,                 
-            date: dayjs(props.training.date).format('DD.MM.YYYY'),
-            duration: props.training.duration,
-            activity: props.training.activity,
-            customer: {
-                firstname: props.training.customer.firstname,
-                lastname: props.training.customer.lastname
-            }
-     
-          }) 
         setOpen(true);
     };
-
+    //Close modal
     const handleClose = () => {
         setOpen(false);
     };
     const handleInputChange = (e) => {
-       
-        setTtraining({...training, [e.target.name]: e.target.value})
+
+        setTtraining({ ...training, [e.target.name]: e.target.value })
     }
 
-    const updateTraining = () => {
+    const addTraining = () => {
         props.updateTraining(training)
         handleClose();
     }
@@ -57,21 +56,21 @@ export default function EditTraining(props) {
     return (
         <div>
             <Button onClick={handleClickOpen}>
-                Edit
+                ADD TRAINING
             </Button>
             <Dialog open={open} onClose={handleClose}>
-                <DialogTitle id="form-dialog-title">Edit training</DialogTitle>
+                <DialogTitle id="form-dialog-title">ADD TRAINING</DialogTitle>
                 <DialogContent>
-                <TextField
-                        autoFocus
-                        margin="dense"
-                        name="date"
-                        value={`${training.customer.firstname} ${training.customer.lastname}`}
-                        onChange={e => handleInputChange(e)}
-                        label="customer"
-                        fullWidth
-                        disabled={true}
+                    <Select 
+                    labelId="demo-simple-select-label"
+                    id="demo-simple-select"
+                    {...customers.map((customer) => {
+                        <MenuItem key={customer.links.self} value={customer.links.self}>{customer.links.lastname}</MenuItem>
+                      })}
                     />
+
+
+
                     <TextField
                         autoFocus
                         margin="dense"
@@ -81,7 +80,7 @@ export default function EditTraining(props) {
                         label="date"
                         fullWidth
                     />
-                      <TextField
+                    <TextField
                         autoFocus
                         margin="dense"
                         name="duration"
@@ -90,7 +89,7 @@ export default function EditTraining(props) {
                         label="duration"
                         fullWidth
                     />
-                      <TextField
+                    <TextField
                         autoFocus
                         margin="dense"
                         name="activity"
@@ -103,7 +102,7 @@ export default function EditTraining(props) {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose}>Cancel</Button>
-                    <Button onClick={updateTraining}>Save</Button>
+                    <Button onClick={addTraining}>Save</Button>
                 </DialogActions>
             </Dialog>
         </div>

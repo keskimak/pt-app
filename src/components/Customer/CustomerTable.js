@@ -2,75 +2,81 @@ import React, { useEffect, useState } from "react";
 import MaterialReactTable from 'material-react-table';
 import { Button } from "@mui/material";
 import EditCustomer from "./EditCustomer";
+import AddCustomer from "./AddCustomer";
 
-export default function CustomerTable() {
+export default function CustomerTable(props) {
 
     const [customers, setCustomers] = useState([]);
 
     const [rowSelection, setRowSelection] = useState({});
 
-
-    const updateCustomer = (customer, link) => {
-        fetch(link, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(customer)
-        })
-            .then(res => fetchData())
-            .catch(err => Error(err))
-    }
-
     const columns = [
         {
             id: row => row.original.links[0].href,
+            size: 20, //medium column
+            enableColumnActions: false,
             Cell: ({ cell, row }) => (
-                <div>  <EditCustomer customer={row.original} updateCustomer={updateCustomer} /> {row.original.links[0].href}</div>
+                <div>  <EditCustomer customer={row.original} updateCustomer={updateCustomer} /> </div>
             ),
         },
-
         {
             id: row => row.original.id,
             muiTableHeadCellProps: { sx: { color: 'green' } }, //custom props
+            size: 20, //medium column
+            enableColumnActions: false,
             Cell: ({ cell, row }) => (
                 <div>
-                    <Button color="warning" onClick={() => deleteCustomer(row.original.links[0].href)}>DELETE {row.original.links[0].href}</Button>
+                    <Button color="warning" onClick={() => deleteCustomer(row.original.links[0].href)}>DELETE</Button>
                 </div>
             ),
         },
-
-
-
         {
             accessorKey: 'firstname', //simple recommended way to define a column
-            header: 'First name',
+            header: 'FIRST NAME',
+            minSize: 20, //min size enforced during resizing
+            maxSize: 400, //max size enforced during resizing
+            size: 50, //medium column
+            wordWrap: "break-word",
             muiTableHeadCellProps: { sx: { color: 'green' } }, //custom props
         },
         {
             accessorKey: 'lastname', //simple recommended way to define a column
-            header: 'Last name',
+            header: 'LAST NAME',
+            minSize: 20, //min size enforced during resizing
+            maxSize: 400, //max size enforced during resizing
+            size: 50, //medium column
             muiTableHeadCellProps: { sx: { color: 'green' } }, //custom props
         },
         {
             accessorKey: 'streetaddress', //simple recommended way to define a column
-            header: 'streetaddress',
+            header: 'STREET ADDRESS',
+            minSize: 20, //min size enforced during resizing
+            maxSize: 400, //max size enforced during resizing
+            size: 50, //medium column
             muiTableHeadCellProps: { sx: { color: 'green' } }, //custom props
         },
         {
             accessorKey: 'postcode', //simple recommended way to define a column
-            header: 'postcode',
-            size: 50,
+            header: 'POSTCODE',
+            minSize: 20, //min size enforced during resizing
+            maxSize: 400, //max size enforced during resizing
+            size: 20, //medium column
             muiTableHeadCellProps: { sx: { color: 'green' } }, //custom props
         },
         {
             accessorKey: 'city', //simple recommended way to define a column
-            header: 'city',
+            header: 'CITY',
+            minSize: 20, //min size enforced during resizing
+            maxSize: 400, //max size enforced during resizing
+            size: 50, //medium column
             muiTableHeadCellProps: { sx: { color: 'green' } }, //custom props
         },
         {
             accessorKey: 'email', //simple recommended way to define a column
-            header: 'email',
+            header: 'EMAIL',
+            minSize: 20, //min size enforced during resizing
+            maxSize: 400, //max size enforced during resizing
+            size: 50, //medium column
             muiTableHeadCellProps: { sx: { color: 'green' } }, //custom props
         },
 
@@ -87,7 +93,6 @@ export default function CustomerTable() {
     }
 
     const deleteCustomer = (link) => {
-        alert(link)
         if (window.confirm('Delete?')) {
             fetch(link, { method: 'DELETE' })
                 .then(response => fetchData())
@@ -95,9 +100,34 @@ export default function CustomerTable() {
         }
     }
 
+    const addCustomer = (customer) => {
+     
+            fetch('http://traineeapp.azurewebsites.net/api/customers',
+             { method: 'POST',     headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(customer)},)
+                .then(response => fetchData())
+                .catch(err => Error(err))
+
+            console.log(customer)
+   
+    }
+    const updateCustomer = (customer, link) => {
+        fetch(link, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(customer)
+        })
+            .then(res => fetchData())
+            .catch(err => Error(err))
+    }
+
     return (
         <div>
-
+            <AddCustomer addCustomer={addCustomer}/>
             <MaterialReactTable
                 columns={columns}
                 data={customers}
@@ -106,6 +136,8 @@ export default function CustomerTable() {
                 enableRowSelection={(row) => row.original.postcode > 18}
                 enableColumnDragging={false}
                 muiSelectCheckboxProps={true}
+                enableDensityToggle={false}
+                enableFullScreenToggle={false}
                 onRowSelectionChange={setRowSelection}
                 state={{ rowSelection }}
                 getRowId={(originalRow) => originalRow.links[0].href}
